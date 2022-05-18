@@ -1,0 +1,36 @@
+apply plugin: 'java'
+
+
+repositories {
+    mavenCentral()
+}
+
+project.ext {
+    cucumberVersion = '5.6.0'
+}
+
+dependencies {
+    testImplementation 'io.cucumber:cucumber-java:' + cucumberVersion
+    testImplementation 'io.cucumber:cucumber-junit:5.6.0'
+    implementation 'org.seleniumhq.selenium:selenium-java:3.141.59'
+    implementation 'org.seleniumhq.selenium:selenium-chrome-driver:3.141.59'
+    implementation group: 'commons-io', name: 'commons-io', version: '2.11.0'
+    implementation group: 'mysql', name: 'mysql-connector-java', version: '8.0.29'
+}
+
+configurations {
+    cucumberRuntime {
+        extendsFrom testImplementation
+    }
+}
+
+task cucumber() {
+    dependsOn assemble, compileTestJava
+    doLast {
+        javaexec {
+            main = "io.cucumber.core.cli.Main"
+            classpath = configurations.cucumberRuntime + sourceSets.main.output + sourceSets.test.output
+            args = ['--plugin', 'html:reports/test-report', '--plugin', 'pretty', '--glue', 'com.test.somosmakers', 'src/test/resources']
+        }
+    }
+}
